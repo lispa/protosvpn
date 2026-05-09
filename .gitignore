@@ -1,0 +1,36 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node.js
+node_modules/
+.next/
+dist/
+
+# Go
+bin/
+tmp/
+vendor/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-data/
+
+# VPN sensitive data
+*.key
+*.crt
+*.csr
+*.ovpn
+pki/
