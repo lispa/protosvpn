@@ -1,0 +1,45 @@
+services:
+
+  api:
+    build:
+      context: ../api
+    container_name: protosvpn-api
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks:
+      - protosvpn-network
+
+  web:
+    build:
+      context: ../web
+    container_name: protosvpn-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - protosvpn-network
+
+  postgres:
+    image: postgres:16
+    container_name: protosvpn-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: protosvpn
+      POSTGRES_USER: protosvpn
+      POSTGRES_PASSWORD: protosvpn_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - protosvpn-network
+
+networks:
+  protosvpn-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
