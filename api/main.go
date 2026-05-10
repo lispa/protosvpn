@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"protosvpn-api/internal/database"
 	"protosvpn-api/internal/handlers"
+	"protosvpn-api/internal/handlers/auth"
 )
 
 type HealthResponse struct {
@@ -32,6 +33,10 @@ func main() {
 
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/api/v1/vpn/status", handlers.VPNStatusHandler)
+	http.HandleFunc(
+		"/api/v1/auth/register",
+		auth.RegisterHandler,
+	)
 
 	log.Println("API server started on :8080")
 
