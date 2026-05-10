@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"protosvpn-api/internal/database"
 	"protosvpn-api/internal/handlers"
 )
 
@@ -26,6 +27,8 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	database.Connect()
+
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/api/v1/vpn/status", handlers.VPNStatusHandler)
 
