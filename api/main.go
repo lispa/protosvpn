@@ -33,10 +33,8 @@ func main() {
 
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/api/v1/vpn/status", handlers.VPNStatusHandler)
-	http.HandleFunc(
-		"/api/v1/auth/register",
-		auth.RegisterHandler,
-	)
+	http.HandleFunc("/api/v1/auth/register", auth.RegisterHandler)
+	http.HandleFunc("/api/v1/auth/login", auth.LoginHandler)
 
 	log.Println("API server started on :8080")
 
