@@ -87,6 +87,27 @@ services:
     networks:
       - protosvpn-network
 
+  openvpn:
+    image: kylemanna/openvpn
+
+    container_name: protosvpn-openvpn
+    restart: unless-stopped
+
+    cap_add:
+      - NET_ADMIN
+
+    devices:
+      - /dev/net/tun
+
+    ports:
+      - "1194:1194/udp"
+
+    volumes:
+      - ../vpn/data:/etc/openvpn
+
+    networks:
+      - protosvpn-network
+
 networks:
   protosvpn-network:
     driver: bridge
