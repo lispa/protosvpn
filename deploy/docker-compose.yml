@@ -45,6 +45,9 @@ services:
 
     volumes:
       - ../vpn/data:/vpn-data:ro
+      
+    environment:
+      DATABASE_URL: postgres://protosvpn:protosvpn_password@postgres:5432/protosvpn
 
   web:
     build:
@@ -83,7 +86,6 @@ services:
       POSTGRES_DB: protosvpn
       POSTGRES_USER: protosvpn
       POSTGRES_PASSWORD: protosvpn_password
-      DATABASE_URL: postgres://protosvpn:protosvpn@postgres:5432/protosvpn
 
     volumes:
       - postgres-data:/var/lib/postgresql/data
