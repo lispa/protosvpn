@@ -43,6 +43,9 @@ services:
     networks:
       - protosvpn-network
 
+    volumes:
+  - ../vpn/data:/vpn-data:ro
+
   web:
     build:
       context: ../web
