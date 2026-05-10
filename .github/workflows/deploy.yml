@@ -3,7 +3,7 @@ name: Deploy ProtosVPN
 on:
   push:
     branches:
-      - phase-1-infra
+      - main
 
 jobs:
   deploy:
@@ -26,7 +26,7 @@ jobs:
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd /opt/protosvpn
 
-            git pull origin phase-1-infra
+            git pull origin main
 
             cd deploy
 
