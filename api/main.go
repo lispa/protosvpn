@@ -28,6 +28,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	database.Connect()
+	database.RunMigrations()
 
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/api/v1/vpn/status", handlers.VPNStatusHandler)
