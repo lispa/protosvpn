@@ -29,7 +29,7 @@ func ParseStatusFile(path string) ([]Client, error) {
 		line := scanner.Text()
 
 		if strings.HasPrefix(line, "CLIENT_LIST") {
-			parts := strings.Split(line, ",")
+			parts := strings.Fields(line)
 
 			if len(parts) < 6 {
 				continue
@@ -38,8 +38,8 @@ func ParseStatusFile(path string) ([]Client, error) {
 			client := Client{
 				Name:          parts[1],
 				RealAddress:   parts[2],
-				BytesReceived: parts[3],
-				BytesSent:     parts[4],
+				BytesReceived: parts[4],
+				BytesSent:     parts[5],
 			}
 
 			clients = append(clients, client)
