@@ -15,14 +15,46 @@ type VPNClient = {
   status: string
 }
 
+type User = {
+  id: number
+  username: string
+  role: string
+}
+
 export default function DashboardPage() {
   const router = useRouter()
 
   const [clients, setClients] = useState<Client[]>([])
   const [vpnClients, setVpnClients] = useState<VPNClient[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [clientName, setClientName] = useState("")
   const [creatingClient, setCreatingClient] = useState(false)
+
+  async function fetchUsers() {
+  try {
+    const token = localStorage.getItem("token")
+
+    const response = await fetch(
+      "/api/v1/admin/users",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      return
+    }
+
+    const data = await response.json()
+
+    setUsers(data.users || [])
+  } catch (error) {
+    console.error(error)
+  }
+}
 
   async function fetchVPNClients() {
   try {
@@ -96,10 +128,12 @@ export default function DashboardPage() {
 
     fetchStatus()
     fetchVPNClients()
+    fetchUsers()
 
     const interval = setInterval(() => {
       fetchStatus()
       fetchVPNClients()
+      fetchUsers()
     }, 5000)
 
     return () => clearInterval(interval)
@@ -474,6 +508,63 @@ export default function DashboardPage() {
                   </button>
                 )}
               </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+        <div className="mt-10">
+  <h2 className="text-3xl font-bold mb-6">
+    Web Users
+  </h2>
+
+  <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+    <table className="w-full">
+      <thead className="bg-zinc-800">
+        <tr>
+          <th className="text-left p-4">
+            ID
+          </th>
+
+          <th className="text-left p-4">
+            Username
+          </th>
+
+          <th className="text-left p-4">
+            Role
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {users.map((user) => (
+          <tr
+            key={user.id}
+            className="
+              border-t
+              border-zinc-800
+            "
+          >
+            <td className="p-4">
+              {user.id}
+            </td>
+
+            <td className="p-4">
+              {user.username}
+            </td>
+
+            <td className="p-4">
+              <span
+                className={
+                  user.role === "admin"
+                    ? "text-yellow-400"
+                    : "text-zinc-300"
+                }
+              >
+                {user.role}
+              </span>
             </td>
           </tr>
         ))}
