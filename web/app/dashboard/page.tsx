@@ -10,13 +10,46 @@ type Client = {
   bytes_sent: string
 }
 
+type VPNClient = {
+  name: string
+  status: string
+}
+
 export default function DashboardPage() {
   const router = useRouter()
 
   const [clients, setClients] = useState<Client[]>([])
+  const [vpnClients, setVpnClients] = useState<VPNClient[]>([])
   const [loading, setLoading] = useState(true)
   const [clientName, setClientName] = useState("")
   const [creatingClient, setCreatingClient] = useState(false)
+
+  async function fetchVPNClients() {
+  try {
+    const token = localStorage.getItem("token")
+
+    const response = await fetch(
+      "/api/v1/vpn/clients",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    setVpnClients(
+      (data.clients || []).filter(
+        (client: VPNClient) =>
+          client.name !==
+          "protosvpn.novikoff.org"
+      )
+    )
+  } catch (error) {
+    console.error(error)
+  }
+}
 
   async function fetchStatus() {
     try {
@@ -62,9 +95,11 @@ export default function DashboardPage() {
     }
 
     fetchStatus()
+    fetchVPNClients()
 
     const interval = setInterval(() => {
       fetchStatus()
+      fetchVPNClients()
     }, 5000)
 
     return () => clearInterval(interval)
@@ -75,6 +110,45 @@ export default function DashboardPage() {
 
     router.push("/login")
   }
+
+  async function handleDownloadClient(
+  clientName: string
+) {
+  try {
+    const token = localStorage.getItem("token")
+
+    const response = await fetch(
+      `/api/v1/vpn/download-client?name=${clientName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const blob = await response.blob()
+
+    const url =
+      window.URL.createObjectURL(blob)
+
+    const link =
+      document.createElement("a")
+
+    link.href = url
+
+    link.download = `${clientName}.ovpn`
+
+    document.body.appendChild(link)
+
+    link.click()
+
+    link.remove()
+  } catch (error) {
+    console.error(error)
+
+    alert("Failed to download config")
+  }
+}
 
   async function handleCreateClient() {
   if (!clientName) {
