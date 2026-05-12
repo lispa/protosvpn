@@ -15,6 +15,8 @@ export default function DashboardPage() {
 
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
+  const [clientName, setClientName] = useState("")
+  const [creatingClient, setCreatingClient] = useState(false)
 
   async function fetchStatus() {
     try {
@@ -74,6 +76,76 @@ export default function DashboardPage() {
     router.push("/login")
   }
 
+  async function handleCreateClient() {
+  if (!clientName) {
+    return
+  }
+
+  try {
+    setCreatingClient(true)
+
+    const token = localStorage.getItem("token")
+
+    const createResponse = await fetch(
+      "/api/v1/vpn/create-client",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          name: clientName,
+        }),
+      }
+    )
+
+    if (!createResponse.ok) {
+      alert("Failed to create VPN client")
+
+      return
+    }
+
+    const downloadResponse = await fetch(
+      `/api/v1/vpn/download-client?name=${clientName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const blob = await downloadResponse.blob()
+
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement("a")
+
+    link.href = url
+
+    link.download = `${clientName}.ovpn`
+
+    document.body.appendChild(link)
+
+    link.click()
+
+    link.remove()
+
+    setClientName("")
+
+    alert("VPN client created")
+  } catch (error) {
+    console.error(error)
+
+    alert("Failed to create VPN client")
+  } finally {
+    setCreatingClient(false)
+  }
+}
+
   return (
     <main className="min-h-screen bg-black text-white p-10">
       <div className="max-w-5xl mx-auto">
@@ -87,20 +159,30 @@ export default function DashboardPage() {
               Online Users: {clients.length}
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="
-                bg-red-600
-                hover:bg-red-700
-                px-4
-                py-2
-                rounded
-              "
-            >
+            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
               Logout
             </button>
           </div>
         </div>
+
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 mb-6">
+  <h2 className="text-2xl font-bold mb-4">
+    Create VPN Client
+  </h2>
+
+  <div className="flex gap-4">
+    <input type="text" placeholder="Client name" value={clientName} onChange={(e) =>setClientName(e.target.value)} className="flex-1 bg-zinc-800 border border-zinc-700 rounded p-3"/>
+
+    <button
+      onClick={handleCreateClient}
+      disabled={creatingClient}
+      className="bg-green-600 hover:bg-green-700 px-6 rounded">
+      {creatingClient
+        ? "Creating..."
+        : "Create"}
+    </button>
+  </div>
+</div>
 
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
           <table className="w-full">
