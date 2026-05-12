@@ -150,6 +150,45 @@ export default function DashboardPage() {
   }
 }
 
+  async function handleRevokeClient(
+  clientName: string
+) {
+  try {
+    const token = localStorage.getItem("token")
+
+    const response = await fetch(
+      "/api/v1/vpn/revoke-client",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          name: clientName,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      alert("Failed to revoke client")
+
+      return
+    }
+
+    await fetchVPNClients()
+
+    alert("Client revoked")
+  } catch (error) {
+    console.error(error)
+
+    alert("Failed to revoke client")
+  }
+}
+
   async function handleCreateClient() {
   if (!clientName) {
     return
@@ -347,6 +386,101 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+          <div className="mt-10">
+  <h2 className="text-3xl font-bold mb-6">
+    VPN Clients
+  </h2>
+
+  <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+    <table className="w-full">
+      <thead className="bg-zinc-800">
+        <tr>
+          <th className="text-left p-4">
+            Client
+          </th>
+
+          <th className="text-left p-4">
+            Status
+          </th>
+
+          <th className="text-left p-4">
+            Actions
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {vpnClients.map((client) => (
+          <tr
+            key={client.name}
+            className="
+              border-t
+              border-zinc-800
+            "
+          >
+            <td className="p-4">
+              {client.name}
+            </td>
+
+            <td className="p-4">
+              <span
+                className={
+                  client.status ===
+                  "active"
+                    ? "text-green-500"
+                    : "text-red-500"
+                }
+              >
+                {client.status}
+              </span>
+            </td>
+
+            <td className="p-4">
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    handleDownloadClient(
+                      client.name
+                    )
+                  }
+                  className="
+                    bg-blue-600
+                    hover:bg-blue-700
+                    px-4
+                    py-2
+                    rounded
+                  "
+                >
+                  Download
+                </button>
+
+                {client.status ===
+                  "active" && (
+                  <button
+                    onClick={() =>
+                      handleRevokeClient(
+                        client.name
+                      )
+                    }
+                    className="
+                      bg-red-600
+                      hover:bg-red-700
+                      px-4
+                      py-2
+                      rounded
+                    "
+                  >
+                    Revoke
+                  </button>
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
         </div>
       </div>
     </main>
