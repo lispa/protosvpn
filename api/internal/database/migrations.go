@@ -6,7 +6,7 @@ import (
 )
 
 func RunMigrations() {
-	query := `
+	usersQuery := `
 	CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		username TEXT UNIQUE NOT NULL,
@@ -18,11 +18,34 @@ func RunMigrations() {
 
 	_, err := DB.Exec(
 		context.Background(),
-		query,
+		usersQuery,
 	)
 
 	if err != nil {
-		log.Fatal("Failed to run migrations:", err)
+		log.Fatal("Failed to run users migration:", err)
+	}
+
+	vpnClientsQuery := `
+	CREATE TABLE IF NOT EXISTS vpn_clients (
+		id SERIAL PRIMARY KEY,
+		name TEXT UNIQUE NOT NULL,
+		owner_user_id INTEGER REFERENCES users(id),
+		status TEXT NOT NULL DEFAULT 'active',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		revoked_at TIMESTAMP
+	);
+	`
+
+	_, err = DB.Exec(
+		context.Background(),
+		vpnClientsQuery,
+	)
+
+	if err != nil {
+		log.Fatal(
+			"Failed to run vpn clients migration:",
+			err,
+		)
 	}
 
 	log.Println("Database migrations completed")
