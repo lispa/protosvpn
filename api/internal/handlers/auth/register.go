@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -77,6 +78,7 @@ func RegisterHandler(
 	)
 
 	if err != nil {
+		log.Println(err)
 		http.Error(
 			w,
 			"failed to create user",
