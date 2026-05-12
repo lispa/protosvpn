@@ -41,6 +41,7 @@ func main() {
 	http.HandleFunc("/api/v1/vpn/create-client", middleware.JWTAuthMiddleware(vpnHandlers.CreateClientHandler))
 	http.HandleFunc("/api/v1/vpn/download-client", middleware.JWTAuthMiddleware(vpnHandlers.DownloadClientHandler))
 	http.HandleFunc("/api/v1/vpn/revoke-client", middleware.JWTAuthMiddleware(vpnHandlers.RevokeClientHandler))
+	http.HandleFunc("/api/v1/vpn/clients", middleware.JWTAuthMiddleware(vpnHandlers.ListClientsHandler))
 
 	log.Println("API server started on :8080")
 
