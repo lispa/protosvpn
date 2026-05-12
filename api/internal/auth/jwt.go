@@ -27,3 +27,7 @@ func GenerateJWT(
 
 	return token.SignedString(jwtSecret)
 }
+
+func GetJWTSecret() []byte {
+	return []byte(config.GetJWTSecret())
+}
