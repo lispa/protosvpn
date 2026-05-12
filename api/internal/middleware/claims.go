@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 
@@ -11,11 +13,29 @@ import (
 func GetUsernameFromRequest(
 	r *http.Request,
 ) (string, error) {
-	tokenString := r.Header.Get(
+	authHeader := r.Header.Get(
 		"Authorization",
 	)
 
-	tokenString = tokenString[7:]
+	if authHeader == "" {
+		return "", errors.New(
+			"missing authorization header",
+		)
+	}
+
+	if !strings.HasPrefix(
+		authHeader,
+		"Bearer ",
+	) {
+		return "", errors.New(
+			"invalid authorization header",
+		)
+	}
+
+	tokenString := strings.TrimPrefix(
+		authHeader,
+		"Bearer ",
+	)
 
 	token, err := jwt.Parse(
 		tokenString,
@@ -30,10 +50,23 @@ func GetUsernameFromRequest(
 		return "", err
 	}
 
-	claims := token.Claims.(jwt.MapClaims)
+	claims, ok :=
+		token.Claims.(jwt.MapClaims)
 
-	username :=
+	if !ok {
+		return "", errors.New(
+			"invalid token claims",
+		)
+	}
+
+	username, ok :=
 		claims["username"].(string)
+
+	if !ok {
+		return "", errors.New(
+			"username not found in token",
+		)
+	}
 
 	return username, nil
 }
