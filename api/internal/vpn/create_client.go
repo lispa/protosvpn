@@ -9,7 +9,10 @@ func CreateClient(
 	clientName string,
 ) error {
 	command := exec.Command(
-		"/usr/local/bin/easyrsa",
+		"docker",
+		"exec",
+		"protosvpn-openvpn",
+		"easyrsa",
 		"build-client-full",
 		clientName,
 		"nopass",
