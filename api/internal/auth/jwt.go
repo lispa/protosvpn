@@ -3,10 +3,10 @@ package auth
 import (
 	"time"
 
+	"protosvpn-api/internal/config"
+
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var jwtSecret = []byte("super-secret-jwt-key")
 
 func GenerateJWT(
 	username string,
@@ -22,6 +22,8 @@ func GenerateJWT(
 		jwt.SigningMethodHS256,
 		claims,
 	)
+
+	jwtSecret := []byte(config.GetJWTSecret())
 
 	return token.SignedString(jwtSecret)
 }
