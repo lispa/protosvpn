@@ -5,6 +5,10 @@ import (
 	"log"
 	"net/http"
 
+	authPackage "protosvpn-api/internal/auth"
+	"protosvpn-api/internal/database"
+	"protosvpn-api/internal/middleware"
+
 	vpnService "protosvpn-api/internal/vpn"
 )
 
@@ -50,6 +54,49 @@ func CreateClientHandler(
 	if err != nil {
 		log.Println(err)
 
+		http.Error(
+			w,
+			err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	username, err :=
+		middleware.GetUsernameFromRequest(r)
+
+	if err != nil {
+		http.Error(
+			w,
+			"failed to get username",
+			http.StatusUnauthorized,
+		)
+
+		return
+	}
+
+	userID, err :=
+		authPackage.GetUserIDByUsername(
+			username,
+		)
+
+	if err != nil {
+		http.Error(
+			w,
+			"failed to get user",
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	err = database.CreateVPNClient(
+		request.Name,
+		userID,
+	)
+
+	if err != nil {
 		http.Error(
 			w,
 			err.Error(),
