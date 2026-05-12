@@ -39,6 +39,7 @@ func main() {
 	http.HandleFunc("/api/v1/auth/register", auth.RegisterHandler)
 	http.HandleFunc("/api/v1/auth/login", auth.LoginHandler)
 	http.HandleFunc("/api/v1/vpn/create-client", middleware.JWTAuthMiddleware(vpnHandlers.CreateClientHandler))
+	http.HandleFunc("/api/v1/vpn/download-client", middleware.JWTAuthMiddleware(vpnHandlers.DownloadClientHandler))
 
 	log.Println("API server started on :8080")
 
