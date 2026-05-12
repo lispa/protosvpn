@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	"protosvpn-api/internal/config"
+
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var jwtSecret = []byte("super-secret-jwt-key")
 
 func JWTAuthMiddleware(
 	next http.HandlerFunc,
@@ -36,6 +36,8 @@ func JWTAuthMiddleware(
 		token, err := jwt.Parse(
 			tokenString,
 			func(token *jwt.Token) (interface{}, error) {
+				jwtSecret := []byte(config.GetJWTSecret())
+
 				return jwtSecret, nil
 			},
 		)

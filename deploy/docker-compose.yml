@@ -59,6 +59,7 @@ services:
       
     environment:
       DATABASE_URL: postgres://protosvpn:protosvpn_password@postgres:5432/protosvpn
+      JWT_SECRET: super-ultra-production-secret-key
 
   web:
     build:
