@@ -9,6 +9,7 @@ import (
 	"protosvpn-api/internal/handlers/auth"
 	"protosvpn-api/internal/middleware"
 
+	adminHandlers "protosvpn-api/internal/handlers/admin"
 	vpnHandlers "protosvpn-api/internal/handlers/vpn"
 )
 
@@ -42,6 +43,7 @@ func main() {
 	http.HandleFunc("/api/v1/vpn/download-client", middleware.JWTAuthMiddleware(vpnHandlers.DownloadClientHandler))
 	http.HandleFunc("/api/v1/vpn/revoke-client", middleware.AdminMiddleware(vpnHandlers.RevokeClientHandler))
 	http.HandleFunc("/api/v1/vpn/clients", middleware.AdminMiddleware(vpnHandlers.ListClientsHandler))
+	http.HandleFunc("/api/v1/admin/users", middleware.AdminMiddleware(adminHandlers.ListUsersHandler))
 
 	log.Println("API server started on :8080")
 
