@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	vpnService "protosvpn-api/internal/vpn"
@@ -47,6 +48,8 @@ func CreateClientHandler(
 	)
 
 	if err != nil {
+		log.Println(err)
+
 		http.Error(
 			w,
 			err.Error(),
