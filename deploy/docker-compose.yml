@@ -43,6 +43,17 @@ services:
     networks:
       - protosvpn-network
 
+    labels:
+    - "traefik.enable=true"
+
+    - "traefik.http.routers.api.rule=Host(`protosvpn.novikoff.org`) && PathPrefix(`/api`)"
+
+    - "traefik.http.routers.api.entrypoints=websecure"
+
+    - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+
+    - "traefik.http.services.api.loadbalancer.server.port=8080"
+
     volumes:
       - ../vpn/data:/vpn-data:ro
       
