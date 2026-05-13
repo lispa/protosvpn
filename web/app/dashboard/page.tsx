@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 
 type Client = {
   name: string
@@ -30,6 +32,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [clientName, setClientName] = useState("")
   const [creatingClient, setCreatingClient] = useState(false)
+  const [role, setRole] = useState("")
 
   async function fetchUsers() {
   try {
@@ -54,6 +57,27 @@ export default function DashboardPage() {
   } catch (error) {
     console.error(error)
   }
+}
+
+  const fetchMe = async () => {
+  const token =
+	localStorage.getItem("token")
+	const response = await fetch(
+		`${API_URL}/api/v1/auth/me`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		},
+	)
+
+	if (!response.ok) {
+		return
+	}
+
+	const data = await response.json()
+
+	setRole(data.role)
 }
 
   async function fetchVPNClients() {
@@ -126,9 +150,29 @@ export default function DashboardPage() {
       return
     }
 
+    const fetchMe = async () => {
+	const response = await fetch(
+		`${API_URL}/api/v1/auth/me`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		},
+	)
+
+	if (!response.ok) {
+		return
+	}
+
+	const data = await response.json()
+
+	setRole(data.role)
+}
+
     fetchStatus()
     fetchVPNClients()
     fetchUsers()
+    fetchMe()
 
     const interval = setInterval(() => {
       fetchStatus()
@@ -515,6 +559,7 @@ export default function DashboardPage() {
     </table>
   </div>
 </div>
+{role === "admin" && (
         <div className="mt-10">
   <h2 className="text-3xl font-bold mb-6">
     Web Users
@@ -572,6 +617,7 @@ export default function DashboardPage() {
     </table>
   </div>
 </div>
+)}
         </div>
       </div>
     </main>
