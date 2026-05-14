@@ -39,7 +39,7 @@ func main() {
 	http.HandleFunc("/api/v1/vpn/status", middleware.JWTAuthMiddleware(handlers.VPNStatusHandler))
 	http.HandleFunc("/api/v1/auth/register", auth.RegisterHandler)
 	http.HandleFunc("/api/v1/auth/login", auth.LoginHandler)
-	http.HandleFunc("/api/v1/vpn/create-client", middleware.AdminMiddleware(vpnHandlers.CreateClientHandler))
+	http.HandleFunc("/api/v1/vpn/create-client", middleware.JWTAuthMiddleware(vpnHandlers.CreateClientHandler))
 	http.HandleFunc("/api/v1/vpn/download-client", middleware.JWTAuthMiddleware(vpnHandlers.DownloadClientHandler))
 	http.HandleFunc("/api/v1/vpn/revoke-client", middleware.AdminMiddleware(vpnHandlers.RevokeClientHandler))
 	http.HandleFunc("/api/v1/vpn/clients", middleware.AdminMiddleware(vpnHandlers.ListClientsHandler))
