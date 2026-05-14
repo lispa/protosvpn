@@ -35,29 +35,29 @@ export default function DashboardPage() {
   const [role, setRole] = useState("")
 
   async function fetchUsers() {
-  try {
-    const token = localStorage.getItem("token")
+    try {
+      const token = localStorage.getItem("token")
 
-    const response = await fetch(
-      "/api/v1/admin/users",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await fetch(
+        "/api/v1/admin/users",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        return
       }
-    )
 
-    if (!response.ok) {
-      return
+      const data = await response.json()
+
+      setUsers(data.users || [])
+    } catch (error) {
+      console.error(error)
     }
-
-    const data = await response.json()
-
-    setUsers(data.users || [])
-  } catch (error) {
-    console.error(error)
   }
-}
 
   const fetchMe = async () => {
   const token =
@@ -81,31 +81,58 @@ export default function DashboardPage() {
 }
 
   async function fetchVPNClients() {
-  try {
-    const token = localStorage.getItem("token")
+    try {
+      const token = localStorage.getItem("token")
 
-    const response = await fetch(
-      "/api/v1/vpn/clients",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-
-    const data = await response.json()
-
-    setVpnClients(
-      (data.clients || []).filter(
-        (client: VPNClient) =>
-          client.name !==
-          "protosvpn.novikoff.org"
+      const response = await fetch(
+        "/api/v1/vpn/clients",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       )
-    )
-  } catch (error) {
-    console.error(error)
+
+      const data = await response.json()
+
+      setVpnClients(
+        (data.clients || []).filter(
+          (client: VPNClient) =>
+            client.name !==
+            "protosvpn.novikoff.org"
+        )
+      )
+    } catch (error) {
+      console.error(error)
+    }
   }
-}
+
+  async function fetchMe() {
+    try {
+      const token = localStorage.getItem("token")
+
+      const response = await fetch(
+        "/api/v1/auth/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        return
+      }
+
+      const data = await response.json()
+
+      console.log(data)
+
+      setRole(data.role)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   async function fetchStatus() {
     try {
@@ -178,6 +205,7 @@ export default function DashboardPage() {
       fetchStatus()
       fetchVPNClients()
       fetchUsers()
+      fetchMe()
     }, 5000)
 
     return () => clearInterval(interval)
@@ -190,152 +218,152 @@ export default function DashboardPage() {
   }
 
   async function handleDownloadClient(
-  clientName: string
-) {
-  try {
-    const token = localStorage.getItem("token")
+    clientName: string
+  ) {
+    try {
+      const token = localStorage.getItem("token")
 
-    const response = await fetch(
-      `/api/v1/vpn/download-client?name=${clientName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
+      const response = await fetch(
+        `/api/v1/vpn/download-client?name=${clientName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-    const blob = await response.blob()
+      const blob = await response.blob()
 
-    const url =
-      window.URL.createObjectURL(blob)
+      const url =
+        window.URL.createObjectURL(blob)
 
-    const link =
-      document.createElement("a")
+      const link =
+        document.createElement("a")
 
-    link.href = url
+      link.href = url
 
-    link.download = `${clientName}.ovpn`
+      link.download = `${clientName}.ovpn`
 
-    document.body.appendChild(link)
+      document.body.appendChild(link)
 
-    link.click()
+      link.click()
 
-    link.remove()
-  } catch (error) {
-    console.error(error)
+      link.remove()
+    } catch (error) {
+      console.error(error)
 
-    alert("Failed to download config")
+      alert("Failed to download config")
+    }
   }
-}
 
   async function handleRevokeClient(
-  clientName: string
-) {
-  try {
-    const token = localStorage.getItem("token")
+    clientName: string
+  ) {
+    try {
+      const token = localStorage.getItem("token")
 
-    const response = await fetch(
-      "/api/v1/vpn/revoke-client",
-      {
-        method: "POST",
+      const response = await fetch(
+        "/api/v1/vpn/revoke-client",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
+          headers: {
+            "Content-Type": "application/json",
 
-          Authorization: `Bearer ${token}`,
-        },
+            Authorization: `Bearer ${token}`,
+          },
 
-        body: JSON.stringify({
-          name: clientName,
-        }),
+          body: JSON.stringify({
+            name: clientName,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        alert("Failed to revoke client")
+
+        return
       }
-    )
 
-    if (!response.ok) {
+      await fetchVPNClients()
+
+      alert("Client revoked")
+    } catch (error) {
+      console.error(error)
+
       alert("Failed to revoke client")
-
-      return
     }
-
-    await fetchVPNClients()
-
-    alert("Client revoked")
-  } catch (error) {
-    console.error(error)
-
-    alert("Failed to revoke client")
   }
-}
 
   async function handleCreateClient() {
-  if (!clientName) {
-    return
-  }
-
-  try {
-    setCreatingClient(true)
-
-    const token = localStorage.getItem("token")
-
-    const createResponse = await fetch(
-      "/api/v1/vpn/create-client",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify({
-          name: clientName,
-        }),
-      }
-    )
-
-    if (!createResponse.ok) {
-      alert("Failed to create VPN client")
-
+    if (!clientName) {
       return
     }
 
-    const downloadResponse = await fetch(
-      `/api/v1/vpn/download-client?name=${clientName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    try {
+      setCreatingClient(true)
+
+      const token = localStorage.getItem("token")
+
+      const createResponse = await fetch(
+        "/api/v1/vpn/create-client",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            name: clientName,
+          }),
+        }
+      )
+
+      if (!createResponse.ok) {
+        alert("Failed to create VPN client")
+
+        return
       }
-    )
 
-    const blob = await downloadResponse.blob()
+      const downloadResponse = await fetch(
+        `/api/v1/vpn/download-client?name=${clientName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-    const url = window.URL.createObjectURL(blob)
+      const blob = await downloadResponse.blob()
 
-    const link = document.createElement("a")
+      const url = window.URL.createObjectURL(blob)
 
-    link.href = url
+      const link = document.createElement("a")
 
-    link.download = `${clientName}.ovpn`
+      link.href = url
 
-    document.body.appendChild(link)
+      link.download = `${clientName}.ovpn`
 
-    link.click()
+      document.body.appendChild(link)
 
-    link.remove()
+      link.click()
 
-    setClientName("")
+      link.remove()
 
-    alert("VPN client created")
-  } catch (error) {
-    console.error(error)
+      setClientName("")
 
-    alert("Failed to create VPN client")
-  } finally {
-    setCreatingClient(false)
+      alert("VPN client created")
+    } catch (error) {
+      console.error(error)
+
+      alert("Failed to create VPN client")
+    } finally {
+      setCreatingClient(false)
+    }
   }
-}
 
   return (
     <main className="min-h-screen bg-black text-white p-10">
@@ -350,30 +378,42 @@ export default function DashboardPage() {
               Online Users: {clients.length}
             </div>
 
-            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
+            >
               Logout
             </button>
           </div>
         </div>
 
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 mb-6">
-  <h2 className="text-2xl font-bold mb-4">
-    Create VPN Client
-  </h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Create VPN Client
+          </h2>
 
-  <div className="flex gap-4">
-    <input type="text" placeholder="Client name" value={clientName} onChange={(e) =>setClientName(e.target.value)} className="flex-1 bg-zinc-800 border border-zinc-700 rounded p-3"/>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Client name"
+              value={clientName}
+              onChange={(e) =>
+                setClientName(e.target.value)
+              }
+              className="flex-1 bg-zinc-800 border border-zinc-700 rounded p-3"
+            />
 
-    <button
-      onClick={handleCreateClient}
-      disabled={creatingClient}
-      className="bg-green-600 hover:bg-green-700 px-6 rounded">
-      {creatingClient
-        ? "Creating..."
-        : "Create"}
-    </button>
-  </div>
-</div>
+            <button
+              onClick={handleCreateClient}
+              disabled={creatingClient}
+              className="bg-green-600 hover:bg-green-700 px-6 rounded"
+            >
+              {creatingClient
+                ? "Creating..."
+                : "Create"}
+            </button>
+          </div>
+        </div>
 
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
           <table className="w-full">
@@ -464,90 +504,41 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
-          <div className="mt-10">
-  <h2 className="text-3xl font-bold mb-6">
-    VPN Clients
-  </h2>
+        </div>
 
-  <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-    <table className="w-full">
-      <thead className="bg-zinc-800">
-        <tr>
-          <th className="text-left p-4">
-            Client
-          </th>
+        <div className="mt-10">
+          <h2 className="text-3xl font-bold mb-6">
+            VPN Clients
+          </h2>
 
-          <th className="text-left p-4">
-            Status
-          </th>
+          <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-zinc-800">
+                <tr>
+                  <th className="text-left p-4">
+                    Client
+                  </th>
 
-          <th className="text-left p-4">
-            Actions
-          </th>
-        </tr>
-      </thead>
+                  <th className="text-left p-4">
+                    Status
+                  </th>
 
-      <tbody>
-        {vpnClients.map((client) => (
-          <tr
-            key={client.name}
-            className="
-              border-t
-              border-zinc-800
-            "
-          >
-            <td className="p-4">
-              {client.name}
-            </td>
+                  <th className="text-left p-4">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
 
-            <td className="p-4">
-              <span
-                className={
-                  client.status ===
-                  "active"
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                {client.status}
-              </span>
-            </td>
-
-            <td className="p-4">
-              <div className="flex gap-3">
-                <button
-                  onClick={() =>
-                    handleDownloadClient(
-                      client.name
-                    )
-                  }
-                  className="
-                    bg-blue-600
-                    hover:bg-blue-700
-                    px-4
-                    py-2
-                    rounded
-                  "
-                >
-                  Download
-                </button>
-
-                {client.status ===
-                  "active" && (
-                  <button
-                    onClick={() =>
-                      handleRevokeClient(
-                        client.name
-                      )
-                    }
+              <tbody>
+                {vpnClients.map((client) => (
+                  <tr
+                    key={client.name}
                     className="
-                      bg-red-600
-                      hover:bg-red-700
-                      px-4
-                      py-2
-                      rounded
+                      border-t
+                      border-zinc-800
                     "
                   >
+<<<<<<< HEAD
                     Revoke
                   </button>
                 )}
@@ -564,19 +555,45 @@ export default function DashboardPage() {
   <h2 className="text-3xl font-bold mb-6">
     Web Users
   </h2>
+=======
+                    <td className="p-4">
+                      {client.name}
+                    </td>
+>>>>>>> phase-5-vpn-management
 
-  <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-    <table className="w-full">
-      <thead className="bg-zinc-800">
-        <tr>
-          <th className="text-left p-4">
-            ID
-          </th>
+                    <td className="p-4">
+                      <span
+                        className={
+                          client.status ===
+                          "active"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }
+                      >
+                        {client.status}
+                      </span>
+                    </td>
 
-          <th className="text-left p-4">
-            Username
-          </th>
+                    <td className="p-4">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() =>
+                            handleDownloadClient(
+                              client.name
+                            )
+                          }
+                          className="
+                            bg-blue-600
+                            hover:bg-blue-700
+                            px-4
+                            py-2
+                            rounded
+                          "
+                        >
+                          Download
+                        </button>
 
+<<<<<<< HEAD
           <th className="text-left p-4">
             Role
           </th>
@@ -618,7 +635,95 @@ export default function DashboardPage() {
   </div>
 </div>
 )}
+=======
+                        {client.status ===
+                          "active" && (
+                          <button
+                            onClick={() =>
+                              handleRevokeClient(
+                                client.name
+                              )
+                            }
+                            className="
+                              bg-red-600
+                              hover:bg-red-700
+                              px-4
+                              py-2
+                              rounded
+                            "
+                          >
+                            Revoke
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+>>>>>>> phase-5-vpn-management
         </div>
+
+        {role === "admin" && (
+          <div className="mt-10">
+            <h2 className="text-3xl font-bold mb-6">
+              Web Users
+            </h2>
+
+            <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-zinc-800">
+                  <tr>
+                    <th className="text-left p-4">
+                      ID
+                    </th>
+
+                    <th className="text-left p-4">
+                      Username
+                    </th>
+
+                    <th className="text-left p-4">
+                      Role
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user.id}
+                      className="
+                        border-t
+                        border-zinc-800
+                      "
+                    >
+                      <td className="p-4">
+                        {user.id}
+                      </td>
+
+                      <td className="p-4">
+                        {user.username}
+                      </td>
+
+                      <td className="p-4">
+                        <span
+                          className={
+                            user.role === "admin"
+                              ? "text-yellow-400"
+                              : "text-zinc-300"
+                          }
+                        >
+                          {user.role}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )
