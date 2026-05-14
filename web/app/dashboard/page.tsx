@@ -149,29 +149,26 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token")
 
-    if (!token) {
-      router.push("/login")
+  if (!token) {
+    router.push("/login")
 
-      return
-    }
+    return
+  }
 
+  fetchStatus()
+  fetchVPNClients()
+  fetchMe()
+
+  const interval = setInterval(() => {
     fetchStatus()
     fetchVPNClients()
     fetchMe()
+  }, 5000)
 
-    const interval = setInterval(() => {
-  fetchStatus()
-  fetchVPNClients()
-
-  if (role === "admin") {
-    fetchUsers()
-  }
-}, 5000)
-
-    return () => clearInterval(interval)
-  }, [router])
+  return () => clearInterval(interval)
+}, [router])
 
   function handleLogout() {
     localStorage.removeItem("token")
