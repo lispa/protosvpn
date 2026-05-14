@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 
 type Client = {
   name: string
@@ -58,27 +56,6 @@ export default function DashboardPage() {
       console.error(error)
     }
   }
-
-  const fetchMe = async () => {
-  const token =
-	localStorage.getItem("token")
-	const response = await fetch(
-		`${API_URL}/api/v1/auth/me`,
-		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		},
-	)
-
-	if (!response.ok) {
-		return
-	}
-
-	const data = await response.json()
-
-	setRole(data.role)
-}
 
   async function fetchVPNClients() {
     try {
@@ -176,25 +153,6 @@ export default function DashboardPage() {
 
       return
     }
-
-    const fetchMe = async () => {
-	const response = await fetch(
-		`${API_URL}/api/v1/auth/me`,
-		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		},
-	)
-
-	if (!response.ok) {
-		return
-	}
-
-	const data = await response.json()
-
-	setRole(data.role)
-}
 
     fetchStatus()
     fetchVPNClients()
@@ -538,28 +496,9 @@ export default function DashboardPage() {
                       border-zinc-800
                     "
                   >
-<<<<<<< HEAD
-                    Revoke
-                  </button>
-                )}
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-{role === "admin" && (
-        <div className="mt-10">
-  <h2 className="text-3xl font-bold mb-6">
-    Web Users
-  </h2>
-=======
                     <td className="p-4">
                       {client.name}
                     </td>
->>>>>>> phase-5-vpn-management
 
                     <td className="p-4">
                       <span
@@ -593,49 +532,6 @@ export default function DashboardPage() {
                           Download
                         </button>
 
-<<<<<<< HEAD
-          <th className="text-left p-4">
-            Role
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {users.map((user) => (
-          <tr
-            key={user.id}
-            className="
-              border-t
-              border-zinc-800
-            "
-          >
-            <td className="p-4">
-              {user.id}
-            </td>
-
-            <td className="p-4">
-              {user.username}
-            </td>
-
-            <td className="p-4">
-              <span
-                className={
-                  user.role === "admin"
-                    ? "text-yellow-400"
-                    : "text-zinc-300"
-                }
-              >
-                {user.role}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-)}
-=======
                         {client.status ===
                           "active" && (
                           <button
@@ -662,7 +558,6 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
->>>>>>> phase-5-vpn-management
         </div>
 
         {role === "admin" && (
