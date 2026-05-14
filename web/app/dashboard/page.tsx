@@ -106,6 +106,9 @@ export default function DashboardPage() {
       console.log(data)
 
       setRole(data.role)
+      if (data.role === "admin") {
+  fetchUsers()
+}
     } catch (error) {
       console.error(error)
     }
@@ -156,15 +159,16 @@ export default function DashboardPage() {
 
     fetchStatus()
     fetchVPNClients()
-    fetchUsers()
     fetchMe()
 
     const interval = setInterval(() => {
-      fetchStatus()
-      fetchVPNClients()
-      fetchUsers()
-      fetchMe()
-    }, 5000)
+  fetchStatus()
+  fetchVPNClients()
+
+  if (role === "admin") {
+    fetchUsers()
+  }
+}, 5000)
 
     return () => clearInterval(interval)
   }, [router])
