@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	internalAuth "protosvpn-api/internal/auth"
@@ -37,6 +38,10 @@ func LoginHandler(
 	var request LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&request)
+
+	log.Println(request.Username)
+	log.Println(request.Password)
+
 	if err != nil {
 		http.Error(
 			w,
