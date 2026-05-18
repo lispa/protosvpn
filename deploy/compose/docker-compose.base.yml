@@ -90,9 +90,6 @@ services:
     container_name: protosvpn-postgres
     restart: unless-stopped
 
-    env_file:
-      - ../env/${ENV_FILE}
-
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
