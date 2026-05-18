@@ -20,13 +20,8 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.email=dmitrynsu@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
 
-    ports:
-      - "80:80"
-      - "443:443"
-
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/acme.json:/letsencrypt/acme.json
 
     networks:
       - protosvpn-network
@@ -50,8 +45,6 @@ services:
     - "traefik.http.routers.api.rule=Host(`protosvpn.novikoff.org`) && PathPrefix(`/api`)"
 
     - "traefik.http.routers.api.entrypoints=websecure"
-
-    - "traefik.http.routers.api.tls.certresolver=letsencrypt"
 
     - "traefik.http.services.api.loadbalancer.server.port=8080"
 
@@ -83,10 +76,6 @@ services:
       - 'traefik.http.routers.web.rule=Host("protosvpn.novikoff.org")'
       - "traefik.http.routers.web.entrypoints=websecure"
       - "traefik.docker.network=deploy_protosvpn-network"
-
-      - "traefik.http.routers.web.tls=true"
-      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
-
       - "traefik.http.services.web.loadbalancer.server.port=3000"
 
     networks:
